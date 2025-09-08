@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Partículas</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="particleCanvas"></canvas>
+    <div class="controls">
+        <button id="toggleAnimation">Pausar</button>
+        <button id="clearParticles">Limpar</button>
+        <label>
+            Quantidade: 
+            <input type="range" id="particleCount" min="50" max="500" value="200">
+            <span id="countValue">200</span>
+        </label>
+    </div>
+    <script src="particles.js"></script>
+</body>
+</html>
