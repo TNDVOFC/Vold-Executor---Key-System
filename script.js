@@ -320,6 +320,7 @@ class RaidTool {
 // Initialize the application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.raidTool = new RaidTool();
+    initializeAnimatedBackground();
     
     // Add some example messages for demonstration
     const exampleMessages = [
@@ -379,3 +380,183 @@ window.addEventListener('error', (event) => {
         window.raidTool.addLog(`Erro global: ${event.message}`, 'error');
     }
 });
+
+// Animated Background Functions
+function initializeAnimatedBackground() {
+    createFloatingSquares();
+    createParticleEffect();
+    startGeometricAnimations();
+}
+
+function createFloatingSquares() {
+    const squaresContainer = document.querySelector('.floating-squares');
+    const numberOfSquares = 12;
+    
+    for (let i = 0; i < numberOfSquares; i++) {
+        const square = document.createElement('div');
+        square.className = 'floating-square';
+        
+        // Random properties
+        const size = Math.random() * 80 + 40; // 40px to 120px
+        const startX = Math.random() * window.innerWidth;
+        const animationDuration = Math.random() * 20 + 15; // 15s to 35s
+        const delay = Math.random() * 20; // 0s to 20s delay
+        const rotation = Math.random() * 360;
+        
+        square.style.cssText = `
+            position: absolute;
+            width: ${size}px;
+            height: ${size}px;
+            background: rgba(255, 255, 255, ${Math.random() * 0.1 + 0.05});
+            border-radius: ${Math.random() * 20 + 10}px;
+            left: ${startX}px;
+            top: 100vh;
+            transform: rotate(${rotation}deg);
+            animation: floatUp ${animationDuration}s infinite linear;
+            animation-delay: -${delay}s;
+            pointer-events: none;
+        `;
+        
+        squaresContainer.appendChild(square);
+    }
+}
+
+function createParticleEffect() {
+    const particleContainer = document.createElement('div');
+    particleContainer.className = 'particle-container';
+    particleContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+    `;
+    
+    document.body.appendChild(particleContainer);
+    
+    // Create particles
+    for (let i = 0; i < 50; i++) {
+        createParticle(particleContainer);
+    }
+}
+
+function createParticle(container) {
+    const particle = document.createElement('div');
+    const size = Math.random() * 4 + 2;
+    const x = Math.random() * window.innerWidth;
+    const y = Math.random() * window.innerHeight;
+    const duration = Math.random() * 3 + 2;
+    
+    particle.style.cssText = `
+        position: absolute;
+        width: ${size}px;
+        height: ${size}px;
+        background: rgba(255, 255, 255, ${Math.random() * 0.3 + 0.1});
+        border-radius: 50%;
+        left: ${x}px;
+        top: ${y}px;
+        animation: twinkle ${duration}s infinite ease-in-out;
+        animation-delay: ${Math.random() * 2}s;
+    `;
+    
+    container.appendChild(particle);
+}
+
+function startGeometricAnimations() {
+    // Add geometric shapes that move around
+    const geometricContainer = document.createElement('div');
+    geometricContainer.className = 'geometric-shapes';
+    geometricContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+    `;
+    
+    document.body.appendChild(geometricContainer);
+    
+    // Create different geometric shapes
+    createTriangle(geometricContainer);
+    createHexagon(geometricContainer);
+    createCircle(geometricContainer);
+}
+
+function createTriangle(container) {
+    const triangle = document.createElement('div');
+    triangle.style.cssText = `
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-left: 30px solid transparent;
+        border-right: 30px solid transparent;
+        border-bottom: 50px solid rgba(255, 215, 0, 0.1);
+        top: 20%;
+        right: 15%;
+        animation: rotateFloat 25s infinite ease-in-out;
+        transform-origin: center;
+    `;
+    
+    container.appendChild(triangle);
+}
+
+function createHexagon(container) {
+    const hexagon = document.createElement('div');
+    hexagon.style.cssText = `
+        position: absolute;
+        width: 60px;
+        height: 34.64px;
+        background: rgba(102, 126, 234, 0.1);
+        margin: 17.32px 0;
+        transform: rotate(30deg);
+        top: 60%;
+        left: 5%;
+        animation: hexagonFloat 20s infinite ease-in-out;
+    `;
+    
+    // Add pseudo elements for hexagon shape
+    hexagon.innerHTML = `
+        <style>
+            .hexagon::before,
+            .hexagon::after {
+                content: "";
+                position: absolute;
+                width: 0;
+                border-left: 30px solid transparent;
+                border-right: 30px solid transparent;
+            }
+            .hexagon::before {
+                bottom: 100%;
+                border-bottom: 17.32px solid rgba(102, 126, 234, 0.1);
+            }
+            .hexagon::after {
+                top: 100%;
+                border-top: 17.32px solid rgba(102, 126, 234, 0.1);
+            }
+        </style>
+    `;
+    
+    hexagon.className = 'hexagon';
+    container.appendChild(hexagon);
+}
+
+function createCircle(container) {
+    const circle = document.createElement('div');
+    circle.style.cssText = `
+        position: absolute;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(118, 75, 162, 0.1) 0%, transparent 70%);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        top: 40%;
+        right: 25%;
+        animation: pulseFloat 18s infinite ease-in-out;
+    `;
+    
+    container.appendChild(circle);
+}
