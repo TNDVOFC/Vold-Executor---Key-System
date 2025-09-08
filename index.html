@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Raid Tool - WebHook</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="background-animation">
+        <div class="floating-squares"></div>
+        <div class="gradient-orbs"></div>
+    </div>
+    
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-bolt"></i>
+                <h1>Raid Tool</h1>
+            </div>
+            <div class="header-controls">
+                <div class="status-indicator">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span class="status-text" id="statusText">Desconectado</span>
+                </div>
+                <div class="settings-toggle">
+                    <button class="settings-btn" id="settingsToggle" title="Configurações">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Webhook Configuration -->
+            <section class="card webhook-section">
+                <div class="card-header">
+                    <i class="fas fa-link"></i>
+                    <h2>Configuração do Webhook</h2>
+                </div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <label for="webhookUrl">URL do Webhook</label>
+                        <input type="url" id="webhookUrl" placeholder="https://discord.com/api/webhooks/..." required>
+                        <button class="btn btn-secondary" id="testWebhook">
+                            <i class="fas fa-vial"></i>
+                            Testar
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Raid Configuration -->
+            <section class="card raid-section">
+                <div class="card-header">
+                    <i class="fas fa-cogs"></i>
+                    <h2>Configuração do Raid</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label for="messageContent">Mensagem</label>
+                            <textarea id="messageContent" placeholder="Digite a mensagem para o raid..." rows="4" required></textarea>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="messageCount">Quantidade de Mensagens</label>
+                            <input type="number" id="messageCount" min="1" max="100" value="10">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="delayBetween">Delay entre Mensagens (ms)</label>
+                            <input type="number" id="delayBetween" min="100" max="10000" value="1000">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="username">Nome de Usuário (Opcional)</label>
+                            <input type="text" id="username" placeholder="Bot Raid">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="avatarUrl">Avatar URL (Opcional)</label>
+                            <input type="url" id="avatarUrl" placeholder="https://...">
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="randomizeMessages">
+                            <label for="randomizeMessages">Randomizar mensagens</label>
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="enableEmbed">
+                            <label for="enableEmbed">Usar Embed</label>
+                        </div>
+                        
+                        <div class="input-group embed-config" style="display: none;">
+                            <label for="embedTitle">Título do Embed</label>
+                            <input type="text" id="embedTitle" placeholder="Título do embed">
+                        </div>
+                        
+                        <div class="input-group embed-config" style="display: none;">
+                            <label for="embedColor">Cor do Embed</label>
+                            <input type="color" id="embedColor" value="#667eea">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Control Panel -->
+            <section class="card control-section">
+                <div class="card-header">
+                    <i class="fas fa-gamepad"></i>
+                    <h2>Controles</h2>
+                </div>
+                <div class="card-body">
+                    <div class="control-buttons">
+                        <button class="btn btn-primary" id="startRaid">
+                            <i class="fas fa-play"></i>
+                            Iniciar Raid
+                        </button>
+                        <button class="btn btn-danger" id="stopRaid" disabled>
+                            <i class="fas fa-stop"></i>
+                            Parar Raid
+                        </button>
+                        <button class="btn btn-secondary" id="clearLogs">
+                            <i class="fas fa-trash"></i>
+                            Limpar Logs
+                        </button>
+                        <button class="btn btn-info" id="saveConfig">
+                            <i class="fas fa-save"></i>
+                            Salvar Config
+                        </button>
+                        <button class="btn btn-info" id="loadConfig">
+                            <i class="fas fa-upload"></i>
+                            Carregar Config
+                        </button>
+                        <button class="btn btn-warning" id="exportLogs">
+                            <i class="fas fa-download"></i>
+                            Exportar Logs
+                        </button>
+                    </div>
+                    
+                    <div class="progress-section">
+                        <div class="progress-info">
+                            <span>Progresso: <span id="progressText">0/0</span></span>
+                            <span>Status: <span id="raidStatus">Parado</span></span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Statistics -->
+            <section class="card stats-section">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar"></i>
+                    <h2>Estatísticas</h2>
+                </div>
+                <div class="card-body">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalRaids">0</div>
+                            <div class="stat-label">Total de Raids</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalMessages">0</div>
+                            <div class="stat-label">Mensagens Enviadas</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="successRate">0%</div>
+                            <div class="stat-label">Taxa de Sucesso</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="uptime">00:00:00</div>
+                            <div class="stat-label">Tempo Online</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Logs -->
+            <section class="card logs-section">
+                <div class="card-header">
+                    <i class="fas fa-terminal"></i>
+                    <h2>Logs</h2>
+                </div>
+                <div class="card-body">
+                    <div class="logs-container" id="logsContainer">
+                        <div class="log-entry info">
+                            <span class="timestamp">[00:00:00]</span>
+                            <span class="message">Sistema inicializado</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 Discord Raid Tool - Para fins educacionais apenas</p>
+            <p class="credit">By TonyX</p>
+        </footer>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-cog"></i> Configurações Avançadas</h3>
+                <button class="modal-close" id="closeSettings">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-tabs">
+                    <button class="tab-btn active" data-tab="general">Geral</button>
+                    <button class="tab-btn" data-tab="appearance">Aparência</button>
+                    <button class="tab-btn" data-tab="advanced">Avançado</button>
+                </div>
+                
+                <div class="tab-content active" id="general-tab">
+                    <div class="setting-group">
+                        <label>Sons de Notificação</label>
+                        <input type="checkbox" id="enableSounds" checked>
+                    </div>
+                    <div class="setting-group">
+                        <label>Auto-scroll nos Logs</label>
+                        <input type="checkbox" id="autoScrollLogs" checked>
+                    </div>
+                    <div class="setting-group">
+                        <label>Confirmar antes de parar raid</label>
+                        <input type="checkbox" id="confirmStop">
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="appearance-tab">
+                    <div class="setting-group">
+                        <label>Animações</label>
+                        <input type="checkbox" id="enableAnimations" checked>
+                    </div>
+                    <div class="setting-group">
+                        <label>Partículas de fundo</label>
+                        <input type="checkbox" id="enableParticles" checked>
+                    </div>
+                    <div class="setting-group">
+                        <label>Volume do beep</label>
+                        <input type="range" id="beepVolume" min="0" max="100" value="50">
+                    </div>
+                </div>
+                
+                <div class="tab-content" id="advanced-tab">
+                    <div class="setting-group">
+                        <label>Limite de logs</label>
+                        <input type="number" id="logLimit" value="1000" min="100" max="5000">
+                    </div>
+                    <div class="setting-group">
+                        <label>Timeout de requisição (ms)</label>
+                        <input type="number" id="requestTimeout" value="10000" min="5000" max="30000">
+                    </div>
+                    <div class="setting-group">
+                        <label>Debug Mode</label>
+                        <input type="checkbox" id="debugMode">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="resetSettings">Reset</button>
+                <button class="btn btn-primary" id="saveSettings">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Input for Config -->
+    <input type="file" id="configFileInput" accept=".json" style="display: none;">
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
