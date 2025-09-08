@@ -10,6 +10,8 @@ class RaidTool {
         this.bindEvents();
         this.updateStatus('Desconectado', false);
         this.addLog('Sistema inicializado', 'info');
+        this.initializeTheme();
+        this.initializeStats();
     }
 
     initializeElements() {
@@ -45,6 +47,39 @@ class RaidTool {
         this.startRaidBtn.addEventListener('click', () => this.startRaid());
         this.stopRaidBtn.addEventListener('click', () => this.stopRaid());
         this.clearLogsBtn.addEventListener('click', () => this.clearLogs());
+        
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        themeToggle.addEventListener('click', () => this.toggleTheme());
+        
+        // Settings modal
+        const settingsToggle = document.getElementById('settingsToggle');
+        const settingsModal = document.getElementById('settingsModal');
+        const closeSettings = document.getElementById('closeSettings');
+        
+        settingsToggle.addEventListener('click', () => this.openSettings());
+        closeSettings.addEventListener('click', () => this.closeSettings());
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) this.closeSettings();
+        });
+        
+        // Additional buttons
+        const saveConfig = document.getElementById('saveConfig');
+        const loadConfig = document.getElementById('loadConfig');
+        const exportLogs = document.getElementById('exportLogs');
+        const configFileInput = document.getElementById('configFileInput');
+        
+        if (saveConfig) saveConfig.addEventListener('click', () => this.saveConfiguration());
+        if (loadConfig) loadConfig.addEventListener('click', () => this.loadConfiguration());
+        if (exportLogs) exportLogs.addEventListener('click', () => this.exportLogs());
+        if (configFileInput) configFileInput.addEventListener('change', (e) => this.handleConfigFile(e));
+        
+        // Embed toggle
+        const enableEmbed = document.getElementById('enableEmbed');
+        if (enableEmbed) {
+            enableEmbed.addEventListener('change', () => this.toggleEmbedConfig());
+        }
         
         // Auto-save webhook URL
         this.webhookUrlInput.addEventListener('input', () => {
@@ -314,6 +349,196 @@ class RaidTool {
 
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // Theme System
+    initializeTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        this.setTheme(savedTheme);
+    }
+
+    toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        this.setTheme(newTheme);
+    }
+
+    setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        
+        const themeIcon = document.getElementById('themeIcon');
+        if (themeIcon) {
+            themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        
+        this.addLog(`Tema alterado para: ${theme === 'dark' ? 'escuro' : 'claro'}`, 'info');
+    }
+
+    // Statistics
+    initializeStats() {
+        this.stats = {
+            totalRaids: parseInt(localStorage.getItem('totalRaids') || '0'),
+            totalMessagesSent: parseInt(localStorage.getItem('totalMessagesSent') || '0'),
+            successfulRequests: parseInt(localStorage.getItem('successfulRequests') || '0'),
+            failedRequests: parseInt(localStorage.getItem('failedRequests') || '0'),
+            startTime: Date.now()
+        };
+        this.updateStatsDisplay();
+        this.startUptimeCounter();
+    }
+
+    updateStatsDisplay() {
+        const totalRaidsEl = document.getElementById('totalRaids');
+        const totalMessagesEl = document.getElementById('totalMessages');
+        const successRateEl = document.getElementById('successRate');
+        
+        if (totalRaidsEl) totalRaidsEl.textContent = this.stats.totalRaids;
+        if (totalMessagesEl) totalMessagesEl.textContent = this.stats.totalMessagesSent;
+        
+        if (successRateEl) {
+            const total = this.stats.successfulRequests + this.stats.failedRequests;
+            const rate = total > 0 ? Math.round((this.stats.successfulRequests / total) * 100) : 0;
+            successRateEl.textContent = rate + '%';
+        }
+    }
+
+    startUptimeCounter() {
+        const uptimeEl = document.getElementById('uptime');
+        if (uptimeEl) {
+            setInterval(() => {
+                const uptime = Date.now() - this.stats.startTime;
+                const hours = Math.floor(uptime / 3600000);
+                const minutes = Math.floor((uptime % 3600000) / 60000);
+                const seconds = Math.floor((uptime % 60000) / 1000);
+                uptimeEl.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+    }
+
+    // Settings Modal
+    openSettings() {
+        const modal = document.getElementById('settingsModal');
+        if (modal) {
+            modal.classList.add('show');
+            modal.style.display = 'flex';
+        }
+    }
+
+    closeSettings() {
+        const modal = document.getElementById('settingsModal');
+        if (modal) {
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+        }
+    }
+
+    // Configuration Management
+    saveConfiguration() {
+        const config = {
+            webhookUrl: this.webhookUrlInput.value,
+            messageContent: this.messageContentInput.value,
+            messageCount: this.messageCountInput.value,
+            delayBetween: this.delayBetweenInput.value,
+            username: this.usernameInput.value,
+            avatarUrl: this.avatarUrlInput.value,
+            randomizeMessages: this.randomizeMessagesInput.checked,
+            enableEmbed: document.getElementById('enableEmbed')?.checked || false,
+            embedTitle: document.getElementById('embedTitle')?.value || '',
+            embedColor: document.getElementById('embedColor')?.value || '#667eea'
+        };
+
+        const dataStr = JSON.stringify(config, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'raid-config.json';
+        link.click();
+        
+        URL.revokeObjectURL(url);
+        this.showToast('Sucesso', 'Configuração salva com sucesso!', 'success');
+    }
+
+    loadConfiguration() {
+        document.getElementById('configFileInput').click();
+    }
+
+    handleConfigFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const config = JSON.parse(e.target.result);
+                
+                // Load configuration
+                if (config.webhookUrl) this.webhookUrlInput.value = config.webhookUrl;
+                if (config.messageContent) this.messageContentInput.value = config.messageContent;
+                if (config.messageCount) this.messageCountInput.value = config.messageCount;
+                if (config.delayBetween) this.delayBetweenInput.value = config.delayBetween;
+                if (config.username) this.usernameInput.value = config.username;
+                if (config.avatarUrl) this.avatarUrlInput.value = config.avatarUrl;
+                if (config.randomizeMessages !== undefined) this.randomizeMessagesInput.checked = config.randomizeMessages;
+                
+                const enableEmbed = document.getElementById('enableEmbed');
+                const embedTitle = document.getElementById('embedTitle');
+                const embedColor = document.getElementById('embedColor');
+                
+                if (enableEmbed && config.enableEmbed !== undefined) {
+                    enableEmbed.checked = config.enableEmbed;
+                    this.toggleEmbedConfig();
+                }
+                if (embedTitle && config.embedTitle) embedTitle.value = config.embedTitle;
+                if (embedColor && config.embedColor) embedColor.value = config.embedColor;
+
+                this.showToast('Sucesso', 'Configuração carregada com sucesso!', 'success');
+                this.addLog('Configuração carregada do arquivo', 'info');
+            } catch (error) {
+                this.showToast('Erro', 'Erro ao carregar configuração: ' + error.message, 'error');
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    exportLogs() {
+        const logs = Array.from(this.logsContainer.children).map(entry => {
+            const timestamp = entry.querySelector('.timestamp').textContent;
+            const message = entry.querySelector('.message').textContent;
+            const type = entry.className.split(' ').find(c => ['success', 'error', 'warning', 'info'].includes(c)) || 'info';
+            return { timestamp, message, type };
+        });
+
+        const dataStr = JSON.stringify(logs, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `raid-logs-${new Date().toISOString().slice(0, 10)}.json`;
+        link.click();
+        
+        URL.revokeObjectURL(url);
+        this.showToast('Sucesso', 'Logs exportados com sucesso!', 'success');
+    }
+
+    toggleEmbedConfig() {
+        const enableEmbed = document.getElementById('enableEmbed');
+        const embedConfigs = document.querySelectorAll('.embed-config');
+        
+        if (enableEmbed && embedConfigs) {
+            embedConfigs.forEach(config => {
+                if (enableEmbed.checked) {
+                    config.style.display = 'flex';
+                    config.classList.add('show');
+                } else {
+                    config.style.display = 'none';
+                    config.classList.remove('show');
+                }
+            });
+        }
     }
 }
 
