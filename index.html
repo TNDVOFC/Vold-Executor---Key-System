@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Raid Tool - WebHook</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-bolt"></i>
+                <h1>Raid Tool</h1>
+            </div>
+            <div class="status-indicator">
+                <span class="status-dot" id="statusDot"></span>
+                <span class="status-text" id="statusText">Desconectado</span>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Webhook Configuration -->
+            <section class="card webhook-section">
+                <div class="card-header">
+                    <i class="fas fa-link"></i>
+                    <h2>Configuração do Webhook</h2>
+                </div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <label for="webhookUrl">URL do Webhook</label>
+                        <input type="url" id="webhookUrl" placeholder="https://discord.com/api/webhooks/..." required>
+                        <button class="btn btn-secondary" id="testWebhook">
+                            <i class="fas fa-vial"></i>
+                            Testar
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Raid Configuration -->
+            <section class="card raid-section">
+                <div class="card-header">
+                    <i class="fas fa-cogs"></i>
+                    <h2>Configuração do Raid</h2>
+                </div>
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label for="messageContent">Mensagem</label>
+                            <textarea id="messageContent" placeholder="Digite a mensagem para o raid..." rows="4" required></textarea>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="messageCount">Quantidade de Mensagens</label>
+                            <input type="number" id="messageCount" min="1" max="100" value="10">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="delayBetween">Delay entre Mensagens (ms)</label>
+                            <input type="number" id="delayBetween" min="100" max="10000" value="1000">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="username">Nome de Usuário (Opcional)</label>
+                            <input type="text" id="username" placeholder="Bot Raid">
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="avatarUrl">Avatar URL (Opcional)</label>
+                            <input type="url" id="avatarUrl" placeholder="https://...">
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="randomizeMessages">
+                            <label for="randomizeMessages">Randomizar mensagens</label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Control Panel -->
+            <section class="card control-section">
+                <div class="card-header">
+                    <i class="fas fa-gamepad"></i>
+                    <h2>Controles</h2>
+                </div>
+                <div class="card-body">
+                    <div class="control-buttons">
+                        <button class="btn btn-primary" id="startRaid">
+                            <i class="fas fa-play"></i>
+                            Iniciar Raid
+                        </button>
+                        <button class="btn btn-danger" id="stopRaid" disabled>
+                            <i class="fas fa-stop"></i>
+                            Parar Raid
+                        </button>
+                        <button class="btn btn-secondary" id="clearLogs">
+                            <i class="fas fa-trash"></i>
+                            Limpar Logs
+                        </button>
+                    </div>
+                    
+                    <div class="progress-section">
+                        <div class="progress-info">
+                            <span>Progresso: <span id="progressText">0/0</span></span>
+                            <span>Status: <span id="raidStatus">Parado</span></span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Logs -->
+            <section class="card logs-section">
+                <div class="card-header">
+                    <i class="fas fa-terminal"></i>
+                    <h2>Logs</h2>
+                </div>
+                <div class="card-body">
+                    <div class="logs-container" id="logsContainer">
+                        <div class="log-entry info">
+                            <span class="timestamp">[00:00:00]</span>
+                            <span class="message">Sistema inicializado</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 Discord Raid Tool - Para fins educacionais apenas</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
