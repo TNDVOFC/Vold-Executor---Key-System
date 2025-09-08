@@ -10,8 +10,8 @@ class RaidTool {
         this.bindEvents();
         this.updateStatus('Desconectado', false);
         this.addLog('Sistema inicializado', 'info');
-        this.initializeTheme();
         this.initializeStats();
+        this.initializeAudio();
     }
 
     initializeElements() {
@@ -43,15 +43,18 @@ class RaidTool {
     }
 
     bindEvents() {
-        this.testWebhookBtn.addEventListener('click', () => this.testWebhook());
-        this.startRaidBtn.addEventListener('click', () => this.startRaid());
+        this.testWebhookBtn.addEventListener('click', () => {
+            this.initializeAudioContext();
+            this.testWebhook();
+        });
+        this.startRaidBtn.addEventListener('click', () => {
+            this.initializeAudioContext();
+            this.startRaid();
+        });
         this.stopRaidBtn.addEventListener('click', () => this.stopRaid());
         this.clearLogsBtn.addEventListener('click', () => this.clearLogs());
         
-        // Theme toggle
-        const themeToggle = document.getElementById('themeToggle');
-        const themeIcon = document.getElementById('themeIcon');
-        themeToggle.addEventListener('click', () => this.toggleTheme());
+        // Removed theme toggle - dark mode only
         
         // Settings modal
         const settingsToggle = document.getElementById('settingsToggle');
@@ -79,6 +82,15 @@ class RaidTool {
         const enableEmbed = document.getElementById('enableEmbed');
         if (enableEmbed) {
             enableEmbed.addEventListener('change', () => this.toggleEmbedConfig());
+        }
+        
+        // Volume control
+        const beepVolumeControl = document.getElementById('beepVolume');
+        if (beepVolumeControl) {
+            beepVolumeControl.value = this.beepVolume * 100;
+            beepVolumeControl.addEventListener('input', (e) => {
+                this.updateBeepVolume(parseInt(e.target.value));
+            });
         }
         
         // Auto-save webhook URL
@@ -281,6 +293,16 @@ class RaidTool {
         if (this.isRunning) {
             this.addLog(`Raid concluído! ${this.messagesSent}/${this.totalMessages} mensagens enviadas`, 'success');
             this.showToast('Concluído', `Raid finalizado: ${this.messagesSent} mensagens enviadas`, 'success');
+            
+            // Play completion sound
+            this.playRaidCompleteSound();
+            
+            // Update stats
+            this.stats.totalRaids++;
+            this.stats.totalMessagesSent += this.messagesSent;
+            localStorage.setItem('totalRaids', this.stats.totalRaids.toString());
+            localStorage.setItem('totalMessagesSent', this.stats.totalMessagesSent.toString());
+            this.updateStatsDisplay();
         }
     }
 
@@ -351,28 +373,77 @@ class RaidTool {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    // Theme System
-    initializeTheme() {
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        this.setTheme(savedTheme);
-    }
-
-    toggleTheme() {
-        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        this.setTheme(newTheme);
-    }
-
-    setTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
+    // Audio System for Beeps
+    initializeAudio() {
+        this.audioContext = null;
+        this.beepVolume = 0.5;
         
-        const themeIcon = document.getElementById('themeIcon');
-        if (themeIcon) {
-            themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        // Load saved volume
+        const savedVolume = localStorage.getItem('beepVolume');
+        if (savedVolume) {
+            this.beepVolume = parseInt(savedVolume) / 100;
         }
         
-        this.addLog(`Tema alterado para: ${theme === 'dark' ? 'escuro' : 'claro'}`, 'info');
+        // Initialize Web Audio API
+        try {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+            console.log('Web Audio API não suportado');
+            this.addLog('Áudio não disponível neste navegador', 'warning');
+        }
+    }
+
+    playBeep(frequency, duration, type = 'sine') {
+        if (!this.audioContext || this.beepVolume === 0) return;
+
+        try {
+            // Resume audio context if suspended
+            if (this.audioContext.state === 'suspended') {
+                this.audioContext.resume();
+            }
+
+            const oscillator = this.audioContext.createOscillator();
+            const gainNode = this.audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(this.audioContext.destination);
+
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+
+            gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(this.beepVolume, this.audioContext.currentTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+
+            oscillator.start(this.audioContext.currentTime);
+            oscillator.stop(this.audioContext.currentTime + duration);
+        } catch (e) {
+            console.error('Erro ao reproduzir beep:', e);
+        }
+    }
+
+    playRaidCompleteSound() {
+        if (!this.audioContext) return;
+
+        // Beep agudo seguido de grave
+        setTimeout(() => this.playBeep(800, 0.2), 0);     // Beep agudo
+        setTimeout(() => this.playBeep(400, 0.3), 300);   // Beep grave
+        setTimeout(() => this.playBeep(600, 0.2), 700);   // Beep médio final
+        
+        this.addLog('Sons de conclusão reproduzidos', 'info');
+    }
+
+    updateBeepVolume(volume) {
+        this.beepVolume = volume / 100;
+        localStorage.setItem('beepVolume', volume.toString());
+    }
+
+    initializeAudioContext() {
+        if (this.audioContext && this.audioContext.state === 'suspended') {
+            this.audioContext.resume().then(() => {
+                this.addLog('Contexto de áudio ativado', 'info');
+            });
+        }
     }
 
     // Statistics

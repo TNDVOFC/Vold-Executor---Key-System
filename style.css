@@ -6,7 +6,7 @@
 }
 
 :root {
-    /* Light Theme Colors - More Natural */
+    /* Dark Theme Only - Professional Colors */
     --primary-gradient: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
     --secondary-gradient: linear-gradient(135deg, #6c7b7f 0%, #4a5568 100%);
     --accent-gradient: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
@@ -14,31 +14,6 @@
     --warning-gradient: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
     --danger-gradient: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
     
-    --bg-primary: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-    --bg-secondary: rgba(255, 255, 255, 0.98);
-    --bg-glass: rgba(255, 255, 255, 0.8);
-    --bg-card: rgba(255, 255, 255, 0.98);
-    --bg-header: rgba(255, 255, 255, 0.9);
-    
-    --text-primary: #2d3748;
-    --text-secondary: #4a5568;
-    --text-light: #ffffff;
-    --text-muted: #718096;
-    
-    --border-color: rgba(226, 232, 240, 0.8);
-    --border-input: #e2e8f0;
-    --border-focus: #4a90e2;
-    
-    --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.05);
-    --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.08);
-    --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.12);
-    
-    --particles-opacity: 0.3;
-    --animation-speed: 1;
-}
-
-/* Dark Theme Colors - More Natural */
-[data-theme="dark"] {
     --bg-primary: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
     --bg-secondary: rgba(45, 55, 72, 0.98);
     --bg-glass: rgba(45, 55, 72, 0.8);
@@ -57,6 +32,9 @@
     --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.25);
     --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.3);
     --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.4);
+    
+    --particles-opacity: 0.3;
+    --animation-speed: 1;
 }
 
 body {
@@ -260,7 +238,7 @@ body {
     gap: 20px;
 }
 
-.theme-btn, .settings-btn {
+.settings-btn {
     background: var(--bg-glass);
     border: 1px solid var(--border-color);
     border-radius: 50%;
@@ -277,7 +255,7 @@ body {
     overflow: hidden;
 }
 
-.theme-btn::before, .settings-btn::before {
+.settings-btn::before {
     content: '';
     position: absolute;
     top: 0;
@@ -288,11 +266,11 @@ body {
     transition: left 0.5s;
 }
 
-.theme-btn:hover::before, .settings-btn:hover::before {
+.settings-btn:hover::before {
     left: 100%;
 }
 
-.theme-btn:hover, .settings-btn:hover {
+.settings-btn:hover {
     transform: translateY(-3px) scale(1.1);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     border-color: rgba(255, 255, 255, 0.4);
@@ -962,6 +940,11 @@ body {
 .setting-group input,
 .setting-group select {
     margin: 0;
+}
+
+.setting-group input[type="range"] {
+    width: 100px;
+    accent-color: var(--primary-gradient);
 }
 
 /* Toast Notifications */

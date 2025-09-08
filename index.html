@@ -23,11 +23,6 @@
                 <h1>Raid Tool</h1>
             </div>
             <div class="header-controls">
-                <div class="theme-toggle">
-                    <button class="theme-btn" id="themeToggle" title="Alternar tema">
-                        <i class="fas fa-moon" id="themeIcon"></i>
-                    </button>
-                </div>
                 <div class="status-indicator">
                     <span class="status-dot" id="statusDot"></span>
                     <span class="status-text" id="statusText">Desconectado</span>
@@ -245,20 +240,16 @@
                 
                 <div class="tab-content" id="appearance-tab">
                     <div class="setting-group">
-                        <label>Tema</label>
-                        <select id="themeSelect">
-                            <option value="auto">Automático</option>
-                            <option value="light">Claro</option>
-                            <option value="dark">Escuro</option>
-                        </select>
-                    </div>
-                    <div class="setting-group">
                         <label>Animações</label>
                         <input type="checkbox" id="enableAnimations" checked>
                     </div>
                     <div class="setting-group">
                         <label>Partículas de fundo</label>
                         <input type="checkbox" id="enableParticles" checked>
+                    </div>
+                    <div class="setting-group">
+                        <label>Volume do beep</label>
+                        <input type="range" id="beepVolume" min="0" max="100" value="50">
                     </div>
                 </div>
                 
